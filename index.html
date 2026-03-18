@@ -1,5 +1,33 @@
-import React, { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, RotateCcw, Award, CheckCircle2, XCircle, Info } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimedia Quiz - KMITL 66011464</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap');
+        body { font-family: 'Kanit', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // ดึงไอคอนจาก Lucide
+        const { ChevronLeft, ChevronRight, RotateCcw, Award, CheckCircle2, XCircle, Info } = {
+            ChevronLeft: () => <i data-lucide="chevron-left"></i>,
+            ChevronRight: () => <i data-lucide="chevron-right"></i>,
+            RotateCcw: () => <i data-lucide="rotate-ccw"></i>,
+            Award: () => <i data-lucide="award"></i>,
+            CheckCircle2: () => <i data-lucide="check-circle-2"></i>,
+            XCircle: () => <i data-lucide="x-circle"></i>,
+            Info: () => <i data-lucide="info"></i>
+        };
 
 const quizData = [
   {
@@ -299,185 +327,159 @@ const quizData = [
   }
 ];
 
-export default function App() {
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [isFinished, setIsFinished] = useState(false);
-  const [showExplanation, setShowExplanation] = useState(false);
+const Icon = ({ name, className }) => {
+            React.useEffect(() => {
+                lucide.createIcons();
+            }, [name]);
+            return <i data-lucide={name} className={className}></i>;
+        };
 
-  const score = useMemo(() => {
-    return Object.entries(answers).reduce((acc, [idx, ans]) => {
-      if (ans === quizData[idx].correct_answer) return acc + 1;
-      return acc;
-    }, 0);
-  }, [answers]);
+        function App() {
+            // --- ปรับส่วน Hook เป็น React.xxx ---
+            const [currentIdx, setCurrentIdx] = React.useState(0);
+            const [answers, setAnswers] = React.useState({});
+            const [isFinished, setIsFinished] = React.useState(false);
+            const [showExplanation, setShowExplanation] = React.useState(false);
 
-  const handleSelect = (choice) => {
-    if (isFinished) return;
-    setAnswers(prev => ({ ...prev, [currentIdx]: choice }));
-    setShowExplanation(true);
-  };
+            const score = React.useMemo(() => {
+                return Object.entries(answers).reduce((acc, [idx, ans]) => {
+                    if (ans === quizData[idx].correct_answer) return acc + 1;
+                    return acc;
+                }, 0);
+            }, [answers]);
 
-  const nextQuestion = () => {
-    if (currentIdx < quizData.length - 1) {
-      setCurrentIdx(currentIdx + 1);
-      setShowExplanation(!!answers[currentIdx + 1]);
-    } else {
-      setIsFinished(true);
-    }
-  };
+            const handleSelect = (choice) => {
+                if (isFinished) return;
+                setAnswers(prev => ({ ...prev, [currentIdx]: choice }));
+                setShowExplanation(true);
+            };
 
-  const prevQuestion = () => {
-    if (currentIdx > 0) {
-      setCurrentIdx(currentIdx - 1);
-      setShowExplanation(true);
-    }
-  };
+            const nextQuestion = () => {
+                if (currentIdx < quizData.length - 1) {
+                    setCurrentIdx(currentIdx + 1);
+                    setShowExplanation(!!answers[currentIdx + 1]);
+                } else {
+                    setIsFinished(true);
+                }
+            };
 
-  const resetQuiz = () => {
-    setAnswers({});
-    setCurrentIdx(0);
-    setIsFinished(false);
-    setShowExplanation(false);
-  };
+            const prevQuestion = () => {
+                if (currentIdx > 0) {
+                    setCurrentIdx(currentIdx - 1);
+                    setShowExplanation(true);
+                }
+            };
 
-  const progress = ((currentIdx + 1) / quizData.length) * 100;
+            const resetQuiz = () => {
+                setAnswers({});
+                setCurrentIdx(0);
+                setIsFinished(false);
+                setShowExplanation(false);
+            };
 
-  if (isFinished) {
-    const isPerfect = score === quizData.length;
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
-          <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-center text-white">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-4">
-              <Award className="w-10 h-10" />
-            </div>
-            <h1 className="text-3xl font-bold mb-2">สรุปผลคะแนน</h1>
-            <p className="text-indigo-100 opacity-90">เก่งมาก! คุณทำแบบทดสอบจบแล้ว</p>
-          </div>
-          <div className="p-8 text-center">
-            <div className="text-6xl font-black text-slate-800 mb-2">
-              {score}<span className="text-2xl text-slate-400 font-medium">/{quizData.length}</span>
-            </div>
-            <div className="text-slate-500 font-medium mb-8">
-              คะแนนความถูกต้อง {((score / quizData.length) * 100).toFixed(1)}%
-            </div>
-            
-            {isPerfect && (
-              <div className="bg-pink-50 text-pink-700 p-6 rounded-2xl mb-8 border border-pink-100 animate-bounce">
-                <p className="text-2xl font-bold">💦Congrat! U R GAY!!!💦</p>
-              </div>
-            )}
+            const progress = ((currentIdx + 1) / quizData.length) * 100;
 
-            <button 
-              onClick={resetQuiz}
-              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-indigo-200 active:scale-95"
-            >
-              <RotateCcw className="w-5 h-5" />
-              ลองทำใหม่อีกครั้ง
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+            if (isFinished) {
+                const isPerfect = score === quizData.length;
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-4">
+                        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+                            <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 text-center text-white">
+                                <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-full mb-4">
+                                    <Icon name="award" className="w-10 h-10" />
+                                </div>
+                                <h1 className="text-3xl font-bold mb-2">สรุปผลคะแนน</h1>
+                                <p className="opacity-90">เก่งมาก! ทำแบบทดสอบจบแล้ว</p>
+                            </div>
+                            <div className="p-8 text-center">
+                                <div className="text-6xl font-black text-slate-800 mb-2">
+                                    {score}<span className="text-2xl text-slate-400 font-medium">/{quizData.length}</span>
+                                </div>
+                                <div className="text-slate-500 font-medium mb-8">
+                                    คิดเป็น {((score / quizData.length) * 100).toFixed(1)}%
+                                </div>
+                                {isPerfect && (
+                                    <div className="bg-pink-50 text-pink-700 p-6 rounded-2xl mb-8 border border-pink-100 animate-bounce">
+                                        <p className="text-2xl font-bold">💦Congrat! U R GAY!!!💦</p>
+                                    </div>
+                                )}
+                                <button onClick={resetQuiz} className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
+                                    <Icon name="rotate-ccw" className="w-5 h-5" /> ลองใหม่อีกครั้ง
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
 
-  const currentQ = quizData[currentIdx];
-  const selected = answers[currentIdx];
+            const currentQ = quizData[currentIdx];
+            const selected = answers[currentIdx];
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-3xl shadow-xl border border-slate-100 flex flex-col min-h-[500px]">
-        {/* Header & Progress */}
-        <div className="p-6 border-b border-slate-100">
-          <div className="flex justify-between items-center mb-4">
-            <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-              Question {currentIdx + 1} of {quizData.length}
-            </span>
-            <span className="text-slate-400 text-sm font-medium">
-              Score: {score}
-            </span>
-          </div>
-          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-indigo-500 transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                    <div className="max-w-2xl w-full bg-white rounded-3xl shadow-xl border border-slate-100 flex flex-col min-h-[500px]">
+                        {/* Header */}
+                        <div className="p-6 border-b border-slate-100">
+                            <div className="flex justify-between items-center mb-4">
+                                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-bold uppercase">
+                                    Question {currentIdx + 1} of {quizData.length}
+                                </span>
+                                <span className="text-slate-400 text-sm font-medium">Score: {score}</span>
+                            </div>
+                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${progress}%` }} />
+                            </div>
+                        </div>
 
-        {/* Question Area */}
-        <div className="p-8 flex-grow">
-          <h2 className="text-xl font-bold text-slate-800 leading-relaxed mb-8">
-            {currentQ.question}
-          </h2>
+                        {/* Content */}
+                        <div className="p-8 flex-grow">
+                            <h2 className="text-xl font-bold text-slate-800 mb-8">{currentQ.question}</h2>
+                            <div className="grid gap-4">
+                                {currentQ.choices.map((choice, i) => {
+                                    const isCorrect = choice === currentQ.correct_answer;
+                                    const isSelected = selected === choice;
+                                    let style = "border-slate-200 hover:border-indigo-300 hover:bg-indigo-50";
+                                    if (selected) {
+                                        if (isCorrect) style = "bg-emerald-50 border-emerald-500 text-emerald-800";
+                                        else if (isSelected) style = "bg-rose-50 border-rose-500 text-rose-800";
+                                        else style = "border-slate-100 text-slate-400 opacity-60";
+                                    }
+                                    return (
+                                        <button key={i} disabled={!!selected} onClick={() => handleSelect(choice)} className={`w-full p-4 text-left border-2 rounded-2xl font-medium transition-all flex items-center justify-between ${style}`}>
+                                            <span>{choice}</span>
+                                            {selected && isCorrect && <Icon name="check-circle-2" className="text-emerald-500" />}
+                                            {selected && isSelected && !isCorrect && <Icon name="x-circle" className="text-rose-500" />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {selected && (
+                                <div className="mt-8 p-4 rounded-2xl flex gap-3 bg-indigo-50 text-indigo-700 border border-indigo-100">
+                                    <Icon name="info" className="shrink-0" />
+                                    <p className="text-sm font-medium">
+                                        {selected === currentQ.correct_answer ? "ถูกต้องแล้ว! นี่คือพื้นฐานสำคัญ" : `เฉลยคือ: ${currentQ.correct_answer}`}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
 
-          <div className="grid gap-4">
-            {currentQ.choices.map((choice, i) => {
-              const isCorrect = choice === currentQ.correct_answer;
-              const isSelected = selected === choice;
-              let style = "border-slate-200 hover:border-indigo-300 hover:bg-indigo-50";
-              
-              if (selected) {
-                if (isCorrect) style = "bg-emerald-50 border-emerald-500 text-emerald-800";
-                else if (isSelected) style = "bg-rose-50 border-rose-500 text-rose-800";
-                else style = "border-slate-100 text-slate-400 opacity-60";
-              }
+                        {/* Navigation */}
+                        <div className="p-6 bg-slate-50 rounded-b-3xl border-t flex justify-between">
+                            <button onClick={prevQuestion} disabled={currentIdx === 0} className="px-6 py-3 flex items-center gap-2 font-bold text-slate-500 hover:text-indigo-600 disabled:opacity-0 transition-all">
+                                <Icon name="chevron-left" /> ย้อนกลับ
+                            </button>
+                            <button onClick={nextQuestion} disabled={!selected} className="px-8 py-3 bg-slate-800 text-white rounded-xl font-bold flex items-center gap-2 active:scale-95 disabled:opacity-50">
+                                {currentIdx === quizData.length - 1 ? 'ดูผลคะแนน' : 'ถัดไป'} <Icon name="chevron-right" />
+                            </button>
+                        </div>
+                    </div>
+                    <p className="mt-8 text-slate-400 text-xs">Student: Radha R. (66011464) | KMITL Computer Engineering</p>
+                </div>
+            );
+        }
 
-              return (
-                <button
-                  key={i}
-                  disabled={!!selected}
-                  onClick={() => handleSelect(choice)}
-                  className={`w-full p-4 text-left border-2 rounded-2xl font-medium transition-all flex items-center justify-between ${style}`}
-                >
-                  <span>{choice}</span>
-                  {selected && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-500" />}
-                  {selected && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-rose-500" />}
-                </button>
-              );
-            })}
-          </div>
-
-          {selected && (
-            <div className="mt-8 animate-in fade-in slide-in-from-bottom-2">
-              <div className={`p-4 rounded-2xl flex gap-3 ${selected === currentQ.correct_answer ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
-                <Info className="w-5 h-5 shrink-0" />
-                <p className="text-sm font-medium">
-                  {selected === currentQ.correct_answer 
-                    ? "ถูกต้องแล้ว! ข้อมูลนี้เป็นส่วนสำคัญในระบบ Multimedia" 
-                    : `อ๊ะ! ข้อที่ถูกคือ "${currentQ.correct_answer}"`
-                  }
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <div className="p-6 bg-slate-50/50 rounded-b-3xl border-t border-slate-100 flex justify-between gap-4">
-          <button
-            onClick={prevQuestion}
-            disabled={currentIdx === 0}
-            className="px-6 py-3 flex items-center gap-2 font-bold text-slate-500 hover:text-indigo-600 disabled:opacity-0 transition-all"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            ย้อนกลับ
-          </button>
-          <button
-            onClick={nextQuestion}
-            disabled={!selected}
-            className="px-8 py-3 bg-slate-800 hover:bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {currentIdx === quizData.length - 1 ? 'ดูผลคะแนน' : 'ข้อถัดไป'}
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-      
-      <p className="mt-8 text-slate-400 text-sm">
-        Student: Radha R. (66011464) | KMITL Computer Engineering
-      </p>
-    </div>
-  );
-}
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
